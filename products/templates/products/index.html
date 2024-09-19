@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Manager</title>
+</head>
+<body>
+    <h1>Добавление продукта</h1>
+    <form id="product-form">
+        <label for="name">Название:</label>
+        <input type="text" id="name" name="name"><br><br>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description"></textarea><br><br>
+
+        <label for="price">Цена:</label>
+        <input type="number" id="price" name="price" step="0.01"><br><br>
+
+        <button type="submit">Отправить</button>
+    </form>
+
+    <h2>Список продуктов</h2>
+    <table border="1" id="products-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Цена</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('product-form');
+        const tableBody = document.querySelector('#products-table tbody');
+
+        // Функция для получения всех продуктов
+        function fetchProducts() {
+            fetch('/api/products/')
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = '';
+                    data.forEach(product => {
+                        const row = `<tr>
+                            <td>${product.id}</td>
+                            <td>${product.name}</td>
+                            <td>${product.description}</td>
+                            <td>${product.price}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                });
+        }
+
+        // Функция для отправки нового продукта
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            const formData = new FormData(form);
+            const productData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                price: formData.get('price'),
+            };
+
+            fetch('/api/products/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData),
+            })
+            .then(response => {
+                if (response.ok) {
+                    form.reset();
+                    fetchProducts();
+                } else {
+                    return response.json().then(data => {
+                        alert('Ошибка: ' + JSON.stringify(data));
+                    });
+                }
+            });
+        });
+
+        // Загрузим продукты при загрузке страницы
+        window.onload = fetchProducts;
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+
+*.pyc
+__pycache__/
+
+
+env/
+venv/
+.venv/
+
+
+*.log
+#db.sqlite3
+media/
+
+
+.env
